@@ -29,6 +29,42 @@ const std = @import("std");
 // ----- example: static library -----
 // -----------------------------------
 
+// pub fn build(b: *std.Build) void {
+//     const target = b.standardTargetOptions(.{});
+//     const optimize = b.standardOptimizeOption(.{});
+
+//     const libfizzbuzz_mod = b.createModule(.{
+//         .root_source_file = b.path("fizzbuzz.zig"),
+//         .target = target,
+//         .optimize = optimize,
+//     });
+//     const libfizzbuzz = b.addStaticLibrary(.{
+//         .name = "fizzbuzz",
+//         .root_module = libfizzbuzz_mod,
+//     });
+//     b.installArtifact(libfizzbuzz);
+
+//     const exe_mod = b.createModule(.{
+//         .root_source_file = b.path("demo.zig"),
+//         .target = target,
+//         .optimize = optimize,
+//     });
+//     const exe = b.addExecutable(.{
+//         .name = "demo",
+//         .root_module = exe_mod,
+//     });
+
+//     exe.linkLibrary(libfizzbuzz);
+
+//     if (b.option(bool, "enable-demo", "install the demo too") orelse false) {
+//         b.installArtifact(exe);
+//     }
+// }
+
+// ------------------------------------
+// ----- example: dynamic library -----
+// ------------------------------------
+
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -38,10 +74,11 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    const libfizzbuzz = b.addStaticLibrary(.{
+    const libfizzbuzz = b.addSharedLibrary(.{
         .name = "fizzbuzz",
         .root_module = libfizzbuzz_mod,
     });
+
     b.installArtifact(libfizzbuzz);
 
     const exe_mod = b.createModule(.{
@@ -55,8 +92,9 @@ pub fn build(b: *std.Build) void {
     });
 
     exe.linkLibrary(libfizzbuzz);
+    b.installArtifact(exe);
 
-    if (b.option(bool, "enable-demo", "install the demo too") orelse false) {
-        b.installArtifact(exe);
-    }
+    const run_cmd = b.addRunArtifact(exe);
+    const run_step = b.step("run", "Run application");
+    run_step.dependOn(&run_cmd.step);
 }
