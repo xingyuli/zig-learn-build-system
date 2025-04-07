@@ -1,10 +1,15 @@
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
+    // const windows = b.option(bool, "windows", "Target Microsoft Windows") orelse false;
+
     const exe_mod = b.createModule(.{
         .root_source_file = b.path("hello.zig"),
+        // .target = b.resolveTargetQuery(.{
+        //     .os_tag = if (windows) .windows else null,
+        // }),
         .target = b.standardTargetOptions(.{}),
-        // .optimize = b.standardOptimizeOption(.{}),
+        .optimize = b.standardOptimizeOption(.{}),
     });
 
     const exe = b.addExecutable(.{
